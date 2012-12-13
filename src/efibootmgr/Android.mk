@@ -10,6 +10,10 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/../include
 LOCAL_SRC_FILES:= \
 	efibootmgr.c
 
+ifeq ($(TARGET_KERNEL_ARCH),x86_64)
+LOCAL_CFLAGS += -DFORCE_32BIT_EBM_RUN_ON_64BIT_OS
+endif
+
 LOCAL_MODULE:= efibootmgr
 
 LOCAL_MODULE_TAGS := optional

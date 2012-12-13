@@ -19,6 +19,10 @@ LOCAL_SRC_FILES:= \
 	efivars_procfs.c \
 	efi.c \
 
+ifeq ($(TARGET_KERNEL_ARCH),x86_64)
+LOCAL_CFLAGS += -DFORCE_32BIT_EBM_RUN_ON_64BIT_OS
+endif
+
 LOCAL_MODULE:= libefibootmgr
 
 include $(BUILD_STATIC_LIBRARY)

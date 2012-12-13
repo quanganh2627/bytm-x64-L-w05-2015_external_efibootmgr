@@ -90,15 +90,23 @@ efi_guidcmp(efi_guid_t left, efi_guid_t right)
 	return memcmp(&left, &right, sizeof (efi_guid_t));
 }
 
-
+#ifdef FORCE_32BIT_EBM_RUN_ON_64BIT_OS
+typedef uint64_t efi_status_t;
+#else
 typedef unsigned long efi_status_t;
+#endif
+
 typedef uint8_t  efi_bool_t;
 typedef uint16_t efi_char16_t;		/* UNICODE character */
 
 typedef struct _efi_variable_t {
         efi_char16_t  VariableName[1024/sizeof(efi_char16_t)];
         efi_guid_t    VendorGuid;
+#ifdef FORCE_32BIT_EBM_RUN_ON_64BIT_OS
+        uint64_t DataSize;
+#else
         unsigned long DataSize;
+#endif
         uint8_t          Data[1024];
 	efi_status_t  Status;
         uint32_t         Attributes;
