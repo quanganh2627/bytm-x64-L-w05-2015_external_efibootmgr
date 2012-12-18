@@ -460,6 +460,46 @@ delete_boot_var(uint16_t num)
 }
 
 
+static efi_status_t
+delete_all_boot_vars_by_label(char *label)
+{
+	list_t *pos, *n;
+	var_entry_t *boot;
+	EFI_LOAD_OPTION *load_option;
+	char name[16];
+	efi_variable_t var;
+	efi_status_t status = EFI_SUCCESS;
+	uint16_t num;
+
+	list_for_each_safe(pos, n, &boot_entry_list) {
+		boot = list_entry(pos, var_entry_t, list);
+		load_option = (EFI_LOAD_OPTION *)
+			boot->var_data.Data;
+		if (!efichar_char_strcmp(label,
+					 load_option->description)) {
+			fprintf(stdout, "delete boot entry : %X\n", boot->num);
+
+			num = boot->num;
+
+			snprintf(name, sizeof(name), "Boot%04X", num);
+			memset(&var, 0, sizeof(var));
+			fill_var(&var, name);
+			status = delete_variable(&var);
+
+			if (status) {
+				fprintf (stderr,"\nboot entry: %X failed to be deleted\n\n",num);
+				return status;
+			}
+
+			status = remove_from_boot_order(num);
+			if (status) return status;
+			list_del(&(boot->list));
+		}
+	}
+
+	return status;
+}
+
 static void
 set_var_nums(const char *pattern, list_t *list)
 {
@@ -780,6 +820,7 @@ usage()
 	printf("\t-b | --bootnum XXXX   modify BootXXXX (hex)\n");
 	printf("\t-B | --delete-bootnum delete bootnum (hex)\n");
 	printf("\t-c | --create         create new variable bootnum and add to bootorder\n");
+	printf("\t-D | --delete-by-label delete ALL boot entries with the same label\n");
 	printf("\t-d | --disk disk       (defaults to /dev/sda) containing loader\n");
 	printf("\t-e | --edd [1|3|-1]   force EDD 1.0 or 3.0 creation variables, or guess\n");
 	printf("\t-E | --device num      EDD 1.0 device number (defaults to 0x80)\n");
@@ -817,6 +858,7 @@ set_default_opts()
 	opts.loader          = "\\elilo.efi";
 	opts.label           = "Linux";
 	opts.disk            = "/dev/sda";
+	opts.delete_all_by_label = NULL;
 	opts.iface           = NULL;
 	opts.part            = 1;
 	opts.acpi_hid        = -1;
@@ -840,6 +882,7 @@ parse_opts(int argc, char **argv)
 			{"delete-bootnum",         no_argument, 0, 'B'},
 			{"create",                 no_argument, 0, 'c'},
 			{"disk",             required_argument, 0, 'd'},
+			{"delete-by-label",  required_argument, 0, 'D'},
 			{"iface",            required_argument, 0, 'i'},
 			{"acpi_hid",         required_argument, 0, 'H'},
 			{"edd-device",       required_argument, 0, 'E'},
@@ -867,7 +910,7 @@ parse_opts(int argc, char **argv)
 		};
 
 		c = getopt_long (argc, argv,
-				 "AaBb:cd:e:E:gH:i:l:L:n:No:Op:qt:TuU:v::Vw@:",
+				 "AaBb:cd:D:e:E:gH:i:l:L:n:No:Op:qt:TuU:v::Vw@:",
 				 long_options, &option_index);
 		if (c == -1)
 			break;
@@ -899,6 +942,9 @@ parse_opts(int argc, char **argv)
 			break;
 		case 'd':
 			opts.disk = optarg;
+			break;
+		case 'D':
+			opts.delete_all_by_label = optarg;
 			break;
 		case 'e':
 			rc = sscanf(optarg, "%d", &num);
@@ -1072,6 +1118,10 @@ main(int argc, char **argv)
 			}
 			else
 				ret=set_active_state();
+		}
+
+		if (opts.delete_all_by_label) {
+			delete_all_boot_vars_by_label(opts.delete_all_by_label);
 		}
 	}
 

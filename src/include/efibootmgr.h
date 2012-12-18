@@ -29,6 +29,7 @@ typedef struct {
 	char *iface;
 	char *loader;
 	char *label;
+	char *delete_all_by_label;
 	char *bootorder;
 	char *testfile;
 	char *extra_opts_file;
