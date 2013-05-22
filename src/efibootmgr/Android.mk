@@ -15,9 +15,10 @@ LOCAL_CFLAGS += -DFORCE_32BIT_EBM_RUN_ON_64BIT_OS
 endif
 
 LOCAL_MODULE:= efibootmgr
-
 LOCAL_MODULE_TAGS := optional
-
-LOCAL_STATIC_LIBRARIES := libefibootmgr libpci_static
+LOCAL_FORCE_STATIC_EXECUTABLE := true
+LOCAL_STATIC_LIBRARIES := libc libefibootmgr libpci_static
+LOCAL_MODULE_PATH := $(PRODUCT_OUT)/iago
+LOCAL_UNSTRIPPED_PATH := $(PRODUCT_OUT)/iago/debug
 
 include $(BUILD_EXECUTABLE)
