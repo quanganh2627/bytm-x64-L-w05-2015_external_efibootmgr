@@ -216,7 +216,7 @@ static ssize_t
 read_lba(int fd, uint64_t lba, void *buffer, size_t bytes)
 {
         int sector_size = get_sector_size(fd);
-        off_t offset = lba * sector_size;
+        off64_t offset = lba * sector_size;
         ssize_t bytesread;
         void *iobuf;
         size_t iobuf_size;
@@ -229,7 +229,7 @@ read_lba(int fd, uint64_t lba, void *buffer, size_t bytes)
         memset(iobuf, 0, bytes);
 
 
-        lseek(fd, offset, SEEK_SET);
+        lseek64(fd, offset, SEEK_SET);
         bytesread = read(fd, iobuf, iobuf_size);
         memcpy(buffer, iobuf, bytes);
         free(iobuf);
@@ -375,6 +375,7 @@ is_gpt_valid(int fd, uint64_t lba,
 		return 0;
 	}
 
+
 	/* We're done, all's well */
 	return 1;
 }
@@ -497,7 +498,6 @@ find_valid_gpt(int fd, gpt_header ** gpt, gpt_entry ** ptes)
 	uint64_t lastlba;
 	if (!gpt || !ptes)
 		return 0;
-
 	lastlba = last_lba(fd);
 	good_pgpt = is_gpt_valid(fd, GPT_PRIMARY_PARTITION_TABLE_LBA,
 				 &pgpt, &pptes);
