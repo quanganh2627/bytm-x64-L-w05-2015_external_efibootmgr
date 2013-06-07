@@ -505,14 +505,11 @@ find_valid_gpt(int fd, gpt_header ** gpt, gpt_entry ** ptes)
 		good_agpt = is_gpt_valid(fd,
                                          __le64_to_cpu(pgpt->alternate_lba),
 					 &agpt, &aptes);
-                if (!good_agpt) {
-                        good_agpt = is_gpt_valid(fd, lastlba,
-                                                 &agpt, &aptes);
-                }
         }
-        else {
-                good_agpt = is_gpt_valid(fd, lastlba,
-                                         &agpt, &aptes);
+
+	if (!good_agpt) {
+	        good_agpt = is_gpt_valid(fd, lastlba,
+                                                 &agpt, &aptes);
         }
 
         /* The obviously unsuccessful case */
