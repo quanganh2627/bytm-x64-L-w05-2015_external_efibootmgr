@@ -191,7 +191,7 @@ disk_get_ide_pci(int fd,
 	int num_scanned, procfd;
 	unsigned int b=0,d=0,disknum=0, controllernum=0;
 	unsigned char part=0;
-	char procname[80], infoline[80];
+	char procname[80], infoline[80] = {0};
 	size_t read_count;
 	int interface_type;
 	int rc;
@@ -209,6 +209,7 @@ disk_get_ide_pci(int fd,
 		return 1;
 	}
 	read_count = read(procfd, infoline, sizeof(infoline)-1);
+	infoline[sizeof(infoline)-1] = '\0'; /* null-terminate */
 	close(procfd);
 	
 	num_scanned = sscanf(infoline,
