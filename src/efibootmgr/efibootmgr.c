@@ -368,6 +368,7 @@ remove_from_boot_order(uint16_t num)
 	new_data_size = boot_order.DataSize;
 	new_data = malloc(new_data_size);
 	if (!new_data) return EFI_OUT_OF_RESOURCES;
+	memset(new_data, 0, new_data_size);
 
 	for (old_i=0,new_i=0;
 	     old_i < boot_order.DataSize / sizeof(uint16_t);
